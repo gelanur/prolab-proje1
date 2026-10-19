@@ -80,8 +80,8 @@ static void kuyruk_temizle(void) { k_bas = 0; k_say = 0; }
 
 static void kuyruk_ekle(int idx)
 {
-  kuyruk[(k_bas + k_say) % MAX_GOREV] = idx;
-  k_say++;
+kuyruk[(k_bas + k_say) % MAX_GOREV] = idx;
+k_say++;
 }
 
 static int kuyruk_cikar(void)
@@ -176,7 +176,7 @@ static int id_ile_bul(int id)
         if (gorevler[orta].id < id) sol = orta + 1;
         else sag = orta - 1;
     }
-    return -1;   
+    return -1;
 }
 
 //dosya okuma fonksiyonu
@@ -265,7 +265,7 @@ static int dosya_oku(const char *yol)
         if (i < gorev_sayisi) {
             printf("Satir %d reddedildi: yinelenen ID %d (ilk kayit korundu).\n",satir_no, id);
             reddedilen++; continue;
-        } 
+        }
         /* Kapasite kontrolu */
         if (gorev_sayisi >= MAX_GOREV) {
             printf("Satir %d reddedildi: kapasite asildi (en fazla %d gorev).\n", satir_no, MAX_GOREV);
@@ -280,7 +280,7 @@ static int dosya_oku(const char *yol)
         strcpy(gorevler[gorev_sayisi].tur, alan[4]);
         gorevler[gorev_sayisi].konum = konum;
         gorev_sayisi++;
-    } 
+    }
     if (ferror(fp))
         printf("UYARI: Dosya okunurken bir hata olustu.\n");
     fclose(fp);
@@ -304,7 +304,7 @@ static int daha_oncelikli(const Gorev *a, const Gorev *b)
     if (a->gelis != b->gelis) return a->gelis < b->gelis;
     return a->id < b->id;
 }
- 
+
 /* SJ/Priority: bekleyen gorevler arasindan en uygununu bulur, yoksa -1 */
 static int bekleyen_sec(void)
 {
@@ -315,18 +315,18 @@ static int bekleyen_sec(void)
     }
     return en;
 }
- 
+
 /* g gorevini t teknisyenine atar. Konum farkliysa teknisyen once gecise girer. */
 static void gorev_ata(int t, int g)
 {
     Teknisyen *tk = &tek[t];
     Gorev *gv = &gorevler[g];
- 
+
     gv->durum = DEVAM_EDIYOR;
     gv->teknisyen = t;
     tk->gorev = g;
     tk->dilim = 0;                       /* RR dilim sayaci her atamada sifirlanir */
- 
+
     if (tk->konum != -1 && tk->konum != gv->konum && GECIS_SURESI > 0) {
         /* Farkli konum: once gecis yapilacak, gorev henuz ilerlemiyor */
         tk->durum = T_GECIS;
@@ -339,7 +339,7 @@ static void gorev_ata(int t, int g)
     }
     tk->konum = gv->konum;               /* Teknisyen artik bu konuma gidiyor */
 }
- 
+
 /* Bos teknisyenlere T1, T2, T3, T4 sirasiyla gorev atar */
 static void atamalari_yap(void)
 {
@@ -355,7 +355,7 @@ static void atamalari_yap(void)
         gorev_ata(t, g);
     }
 }
- 
+
 /* Geliş zamani gelen gorevleri "Bekliyor" yapar.
  * Dizi ID'ye gore sirali oldugundan ayni anda gelenler kucuk ID sirasiyla
  * RR kuyrugunun sonuna eklenir. */
@@ -369,7 +369,6 @@ static void gelenleri_isle(void)
         }
     }
 }
- 
 /* Simulasyonu zaman 0'a dondurur, tum durum ve istatistikleri temizler,
  * ardindan zaman 0'daki gelisleri ve ilk atamalari yapar. */
 static void sim_sifirla(void)
@@ -399,7 +398,6 @@ static void sim_sifirla(void)
         atamalari_yap();
     }
 }
- 
 /* Zamani 1 birim ilerletir. Islem sirasi projedeki kurallara gore:
  *  1) [saat, saat+1) araliginda calisan gorevler ilerler, gecisler azalir
  *  2) saat artar
@@ -410,7 +408,7 @@ static void sim_sifirla(void)
 static void bir_adim(void)
 {
     int dolan[TEKNISYEN_SAY], dolan_say = 0, t;
- 
+
     /* 1) Bir birimlik calisma */
     for (t = 0; t < TEKNISYEN_SAY; t++) {
         Teknisyen *tk = &tek[t];
@@ -427,18 +425,16 @@ static void bir_adim(void)
             tk->calisilan++;
             tk->dilim++;
         }
-    }
- 
-    /* 2) Saat ilerler */
+    }   /* 2) Saat ilerler */
     saat++;
- 
+
     /* 3) Bitenler ve quantumu dolanlar */
     for (t = 0; t < TEKNISYEN_SAY; t++) {
         Teknisyen *tk = &tek[t];
         Gorev *g;
         if (tk->durum != T_CALISIYOR) continue;
         g = &gorevler[tk->gorev];
- 
+
         if (g->kalan == 0) {
             /* Gorev bitti (quantum ile ayni anda bitse de tamamlanir) */
             g->durum = TAMAMLANDI;
@@ -458,17 +454,17 @@ static void bir_adim(void)
             tk->dilim = 0;
         }
     }
- 
+
     /* 4) Yeni gelisler */
     gelenleri_isle();
- 
+
     /* 5) RR: quantumu dolanlar teknisyen numarasi sirasiyla kuyruk sonuna */
     for (t = 0; t < dolan_say; t++) kuyruk_ekle(dolan[t]);
- 
+
     /* 6) Atamalar */
     atamalari_yap();
 }
- 
+
 /* Hedef zamana gider. Gecmise donuluyorsa basa donup yeniden hesaplar. */
 static void zamana_git(int hedef)
 {
@@ -480,7 +476,7 @@ static void tablo_basligi(void)
     printf("%-7s %-6s %-5s %-8s %-14s %-10s %-6s\n","ID", "Gelis", "Sure", "Oncelik", "Durum", "Teknisyen", "Kalan");
     printf("--------------------------------------------------------------\n");
 }
- 
+
 static void gorev_satiri(const Gorev *g)
 {
     char tk[16];
@@ -488,13 +484,13 @@ static void gorev_satiri(const Gorev *g)
     else strcpy(tk, "-");          /* Bekleyen/gelmemis gorevde teknisyen bos */
     printf("%-7d %-6d %-5d %-8d %-14s %-10s %-6d\n",g->id, g->gelis, g->sure, g->oncelik, DURUM_ADLARI[g->durum], tk, g->kalan);
 }
- 
+
 /* filtre = -1 ise tum gorevler, aksi halde sadece o durumdakiler. Sayfalamali. */
 static void gorevleri_listele(int filtre)
 {
     int i, sayfadaki = 0, toplam = 0;
     char buf[16];
- 
+
     for (i = 0; i < gorev_sayisi; i++) {
         if (filtre != -1 && (int)gorevler[i].durum != filtre) continue;
         if (sayfadaki == 0) { printf("\n"); tablo_basligi(); }
@@ -511,7 +507,7 @@ static void gorevleri_listele(int filtre)
     if (toplam == 0) printf("\nListelenecek gorev yok.\n");
     else printf("\nToplam %d gorev listelendi.\n", toplam);
 }
- 
+
 static void durum_listele(void)
 {
     int s;
@@ -519,16 +515,16 @@ static void durum_listele(void)
     s = tamsayi_al("Durum seciniz: ", 1, 4);
     gorevleri_listele(s - 1);
 }
- 
+
 static void id_sorgula(void)
 {
     int id = tamsayi_al("Gorev ID: ", INT_MIN, INT_MAX);
     int i = id_ile_bul(id);
     const Gorev *g;
- 
+
     if (i < 0) { printf("ID %d ile gorev bulunamadi.\n", id); return; }
     g = &gorevler[i];
- 
+
     printf("\n--- Gorev %d ---\n", g->id);
     printf("Gorev turu        : %s\n", g->tur);
     printf("Konum             : %s\n", KONUMLAR[g->konum]);
@@ -551,7 +547,7 @@ static void id_sorgula(void)
         printf("Tamamlanma        : -\n");
     }
 }
- 
+
 static void teknisyenleri_goster(void)
 {
     int t;
@@ -563,7 +559,7 @@ static void teknisyenleri_goster(void)
         const char *d = tk->durum == T_BOS ? "Bos" :
                         tk->durum == T_GECIS ? "Geciste" : "Mesgul";
         char gorev[16], kalan[16], dilim[16];
- 
+
         if (tk->gorev >= 0) {
             sprintf(gorev, "%d", gorevler[tk->gorev].id);
             sprintf(kalan, "%d", gorevler[tk->gorev].kalan);
@@ -573,17 +569,17 @@ static void teknisyenleri_goster(void)
             strcpy(gorev, "-"); strcpy(kalan, "-"); strcpy(dilim, "-");
         }
         if (algoritma != ALG_RR) dilim[0] = '\0';
- 
+
         printf("T%-4d %-9s %-7s %-12s %-11s %-10d %-10s %-6d\n",t + 1, d, gorev, kalan, dilim, tk->calisilan, tk->konum >= 0 ? KONUMLAR[tk->konum] : "-", tk->gecis_sayisi);
     }
 }
- 
+
 static void istatistikleri_goster(void)
 {
     int sayac[4] = {0, 0, 0, 0};
     long long toplam_bekleme = 0, toplam_sistemde = 0, toplam_calisma = 0;
     int i, t, son_bitis = -1, toplam_gecis = 0;
- 
+
     for (i = 0; i < gorev_sayisi; i++) {
         const Gorev *g = &gorevler[i];
         sayac[g->durum]++;
@@ -594,7 +590,7 @@ static void istatistikleri_goster(void)
             if (g->bitis > son_bitis) son_bitis = g->bitis;
         }
     }
- 
+
     printf("\n========== ISTATISTIKLER (zaman %d) ==========\n", saat);
     printf("Algoritma            : %s", ALG_ADLARI[algoritma]);
     if (algoritma == ALG_RR) printf(" (quantum %d)", quantum);
@@ -604,14 +600,14 @@ static void istatistikleri_goster(void)
     printf("  Devam ediyor       : %d\n", sayac[DEVAM_EDIYOR]);
     printf("  Tamamlandi         : %d\n", sayac[TAMAMLANDI]);
     printf("  (Toplam            : %d)\n",sayac[0] + sayac[1] + sayac[2] + sayac[3]);
- 
+
     if (gorev_sayisi > 0 && sayac[TAMAMLANDI] == gorev_sayisi)
-        printf("Son bitis zamani     : %d  (makespan - tum gorevler tamamlandi)\n", son_bitis);
+        printf("Son bitis zamani     : %d  (Son gorevin bitis zamani - tum gorevler tamamlandi)\n", son_bitis);
     else if (son_bitis >= 0)
         printf("Son bitis zamani     : %d  (henuz tum gorevler tamamlanmadi)\n", son_bitis);
     else
         printf("Son bitis zamani     : -\n");
- 
+
     if (sayac[TAMAMLANDI] > 0) {
         printf("Ortalama bekleme     : %.3f\n",(double)toplam_bekleme / sayac[TAMAMLANDI]);
         printf("Ortalama sistemde kalma: %.3f\n",(double)toplam_sistemde / sayac[TAMAMLANDI]);
@@ -619,7 +615,7 @@ static void istatistikleri_goster(void)
         printf("Ortalama bekleme     : hesaplanamaz (tamamlanan gorev yok)\n");
         printf("Ortalama sistemde kalma: hesaplanamaz (tamamlanan gorev yok)\n");
     }
- 
+
     printf("\nTeknisyen kullanim oranlari:\n");
     for (t = 0; t < TEKNISYEN_SAY; t++) {
         toplam_calisma += tek[t].calisilan;
@@ -637,8 +633,63 @@ static void istatistikleri_goster(void)
                100.0 * toplam_calisma / (4.0 * saat));
     printf("Toplam konum gecisi  : %d (her biri %d birim)\n", toplam_gecis, GECIS_SURESI);
 }
-int main() {
 
 
-return 0;
+
+
+int main(void) {
+char yol[MAX_SATIR];
+    int secim;
+
+    /* 1) Dosya yolunu al ve oku */
+    for (;;) {
+        printf("Gorev dosyasinin yolunu giriniz (cikmak icin bos birakin): ");
+        satir_oku(yol, sizeof yol);
+        if (yol[0] == '\0') return 0;
+        if (dosya_oku(yol)) break;
+    }
+
+    /* 2) Dosya okunduktan sonra algoritma secimi */
+    algoritma_sec();
+
+    /* 3) Ana menu dongusu */
+    for (;;) {
+        ana_menu_yaz();
+        secim = tamsayi_al("Seciminiz: ", 0, 10);
+
+        switch (secim) {
+        case 1: algoritma_sec(); break;
+        case 2: gorevleri_listele(-1); break;
+        case 3: durum_listele(); break;
+        case 4: id_sorgula(); break;
+        case 5: teknisyenleri_goster(); break;
+        case 6:
+            bir_adim();
+            printf("Zaman %d'e ilerletildi.\n", saat);
+            break;
+        case 7: {
+            int n = tamsayi_al("N (pozitif): ", 1, INT_MAX);
+            if (n > INT_MAX - saat) { printf("Zaman sinirini asar.\n"); break; }
+            zamana_git(saat + n);
+            printf("Zaman %d'e ilerletildi.\n", saat);
+            break;
+        }
+        case 8: {
+            int h = tamsayi_al("Hedef zaman (0 veya buyuk): ", 0, INT_MAX);
+            if (h == saat) printf("Zaten zaman %d'desiniz, durum degismedi.\n", saat);
+            else { zamana_git(h); printf("Zaman %d'e gidildi.\n", saat); }
+            break;
+        }
+        case 9: istatistikleri_goster(); break;
+        case 10:
+            sim_sifirla();
+            printf("Simulasyon sifirlandi (zaman 0, ilk atamalar yapildi).\n");
+            break;
+        case 0:
+            printf("Cikis yapiliyor.\n");
+            return 0;
+        }
+        if (secim != 6) devam_icin_bekle();
+    }return 0;
 }
+
