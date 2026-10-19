@@ -5,7 +5,6 @@
 #include <limits.h>
 #include <errno.h>
 
-
 #define MAX_GOREV      5000   /* En az 1000 gorev istendi; kapasite 5000     */
 #define MAX_SATIR      512    /* Dosyadan okunabilecek en uzun satir          */
 #define MAX_TUR        40     /* Gorev turu: en fazla 39 karakter + '\0'      */
@@ -17,12 +16,9 @@
 #define GECIS_SURESI   1      /* Konum degisim maliyeti (birim)               */
 #endif
 
-
 typedef enum { HENUZ_GELMEDI = 0, BEKLIYOR, DEVAM_EDIYOR, TAMAMLANDI } Durum;
-
 /* Secili algoritma */
 typedef enum { ALG_YOK = 0, ALG_SJ, ALG_PRIORITY, ALG_RR } Algoritma;
-
 /* Teknisyenin durumu */
 typedef enum { T_BOS = 0, T_GECIS, T_CALISIYOR } TeknisyenDurum;
 
@@ -34,7 +30,6 @@ int  sure;             /* SURE (toplam calisma) */
 int  oncelik;          /* 1 (en onemli) .. 5 */
 char tur[MAX_TUR];     /* GOREV_TURU */
 int  konum;            /* KONUMLAR dizisindeki indeks */
-
  /* Simulasyon sirasinda degisen bilgiler */
 Durum durum;
 int  kalan;            /* Kalan calisma suresi */
@@ -70,7 +65,6 @@ static Teknisyen tek[TEKNISYEN_SAY];
 static int       saat = 0;
 static Algoritma algoritma = ALG_YOK;
 static int       quantum = 0;
-
 /* Round Robin icin dairesel kuyruk. Bir gorev kuyrukta en fazla bir kez
  * bulunabildigi icin MAX_GOREV boyutu yeterlidir. */
 static int kuyruk[MAX_GOREV];
@@ -91,7 +85,6 @@ static int kuyruk_cikar(void)
     k_say--;
     return idx;
 }
-
 /* Klavyeden bir satir okur. Satir sonundaki '\n' silinir; tampona
  * sigmayan fazlalik atilir. Girdi biterse (EOF) program kapanir. */
 static void satir_oku(char *buf, int boyut)
@@ -110,7 +103,6 @@ static void satir_oku(char *buf, int boyut)
         while ((c = getchar()) != '\n' && c != EOF) { }
     }
 }
-
 /* Metni tam sayiya cevirir. Basarili ise 1, aksi halde 0 dondurur.
  * "12abc", "", "3.5" ve int sinirini asan degerler gecersizdir. */
 static int tamsayi_cevir(const char *s, int *sonuc)
@@ -127,7 +119,6 @@ static int tamsayi_cevir(const char *s, int *sonuc)
     *sonuc = (int)v;
     return 1;
 }
-
 /* Kullanicidan [alt, ust] araliginda bir tam sayi alir; gecersizse tekrar sorar. */
 static int tamsayi_al(const char *mesaj, int alt, int ust)
 {
@@ -158,14 +149,12 @@ static int konum_bul(const char *s)
         if (strcmp(s, KONUMLAR[i]) == 0) return i;
     return -1;
 }
-
 /* qsort icin: gorevleri ID'ye gore sirala */
 static int id_karsilastir(const void *a, const void *b)
 {
     const Gorev *x = (const Gorev *)a, *y = (const Gorev *)b;
     return (x->id > y->id) - (x->id < y->id);
 }
-
 /* Sirali dizide ID ile ikili arama. Bulunamazsa -1. */
 static int id_ile_bul(int id)
 {
@@ -178,7 +167,6 @@ static int id_ile_bul(int id)
     }
     return -1;
 }
-
 //dosya okuma fonksiyonu
 static int dosya_oku(const char *yol)
 {
@@ -304,7 +292,6 @@ static int daha_oncelikli(const Gorev *a, const Gorev *b)
     if (a->gelis != b->gelis) return a->gelis < b->gelis;
     return a->id < b->id;
 }
-
 /* SJ/Priority: bekleyen gorevler arasindan en uygununu bulur, yoksa -1 */
 static int bekleyen_sec(void)
 {
@@ -315,7 +302,6 @@ static int bekleyen_sec(void)
     }
     return en;
 }
-
 /* g gorevini t teknisyenine atar. Konum farkliysa teknisyen once gecise girer. */
 static void gorev_ata(int t, int g)
 {
@@ -339,7 +325,6 @@ static void gorev_ata(int t, int g)
     }
     tk->konum = gv->konum;               /* Teknisyen artik bu konuma gidiyor */
 }
-
 /* Bos teknisyenlere T1, T2, T3, T4 sirasiyla gorev atar */
 static void atamalari_yap(void)
 {
@@ -355,7 +340,6 @@ static void atamalari_yap(void)
         gorev_ata(t, g);
     }
 }
-
 /* Geliş zamani gelen gorevleri "Bekliyor" yapar.
  * Dizi ID'ye gore sirali oldugundan ayni anda gelenler kucuk ID sirasiyla
  * RR kuyrugunun sonuna eklenir. */
@@ -454,10 +438,8 @@ static void bir_adim(void)
             tk->dilim = 0;
         }
     }
-
     /* 4) Yeni gelisler */
     gelenleri_isle();
-
     /* 5) RR: quantumu dolanlar teknisyen numarasi sirasiyla kuyruk sonuna */
     for (t = 0; t < dolan_say; t++) kuyruk_ekle(dolan[t]);
 
@@ -632,15 +614,55 @@ static void istatistikleri_goster(void)
         printf("Genel kullanim       : %%%.3f\n",
                100.0 * toplam_calisma / (4.0 * saat));
     printf("Toplam konum gecisi  : %d (her biri %d birim)\n", toplam_gecis, GECIS_SURESI);
+} 
+/* ======================================================================== */
+/*                               Menuler                                    */
+/* ======================================================================== */
+ 
+static void algoritma_sec(void)
+{
+    int s;
+    printf("\n--- Algoritma Secimi ---\n");
+    printf("1 - Shortest Job\n");
+    printf("2 - Priority\n");
+    printf("3 - Round Robin\n");
+    s = tamsayi_al("Seciminiz: ", 1, 3);
+ 
+    algoritma = (Algoritma)s;
+    quantum = 0;
+    if (algoritma == ALG_RR)
+        quantum = tamsayi_al("Round Robin zaman dilimi (quantum): ", 1, INT_MAX);
+ 
+    /* Algoritma her secildiginde simulasyon zaman 0'dan baslar */
+    sim_sifirla();
+    printf("%s secildi. Simulasyon zaman 0'dan baslatildi, ilk atamalar yapildi.\n",
+           ALG_ADLARI[algoritma]);
 }
-
-
-
-
-int main(void) {
-char yol[MAX_SATIR];
+ 
+static void ana_menu_yaz(void)
+{
+    printf("\n================ TEKNIK DESTEK SIMULASYONU ================\n");
+    printf("Zaman: %d (%d dk) | Algoritma: %s", saat, saat * 5, ALG_ADLARI[algoritma]);
+    if (algoritma == ALG_RR) printf(" | Quantum: %d", quantum);
+    printf("\n-----------------------------------------------------------\n");
+    printf(" 1) Algoritma sec veya degistir\n");
+    printf(" 2) Tum gorevleri listele\n");
+    printf(" 3) Gorevleri durumuna gore listele\n");
+    printf(" 4) Gorev ID ile sorgula\n");
+    printf(" 5) Teknisyenlerin durumunu goster\n");
+    printf(" 6) Zamani 1 birim ilerlet\n");
+    printf(" 7) Zamani N birim ilerlet\n");
+    printf(" 8) Belirli bir zamana git\n");
+    printf(" 9) Istatistikleri goster\n");
+    printf("10) Simulasyonu sifirla\n");
+    printf(" 0) Cikis\n");
+}
+ 
+int main(void)
+{
+    char yol[MAX_SATIR];
     int secim;
-
+ 
     /* 1) Dosya yolunu al ve oku */
     for (;;) {
         printf("Gorev dosyasinin yolunu giriniz (cikmak icin bos birakin): ");
@@ -648,15 +670,15 @@ char yol[MAX_SATIR];
         if (yol[0] == '\0') return 0;
         if (dosya_oku(yol)) break;
     }
-
+ 
     /* 2) Dosya okunduktan sonra algoritma secimi */
     algoritma_sec();
-
+ 
     /* 3) Ana menu dongusu */
     for (;;) {
         ana_menu_yaz();
         secim = tamsayi_al("Seciminiz: ", 0, 10);
-
+ 
         switch (secim) {
         case 1: algoritma_sec(); break;
         case 2: gorevleri_listele(-1); break;
@@ -690,6 +712,5 @@ char yol[MAX_SATIR];
             return 0;
         }
         if (secim != 6) devam_icin_bekle();
-    }return 0;
+    }
 }
-
