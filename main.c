@@ -716,6 +716,7 @@ int main(void)
             bir_adim();
             printf("Zaman %d'e ilerletildi.\n", saat);
             break;
+
         case 7: {
             int n = tamsayi_al("N (pozitif): ", 1, INT_MAX);
             if (n > INT_MAX - saat) { printf("Zaman sinirini asar.\n"); break; }
